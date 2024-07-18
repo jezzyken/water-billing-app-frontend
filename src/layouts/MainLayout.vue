@@ -1,5 +1,5 @@
 <template>
-  <q-layout view="lHh Lpr lFf">
+  <q-layout view="hHh lpR fFf">
     <q-header elevated>
       <q-toolbar>
         <q-btn
@@ -7,97 +7,114 @@
           dense
           round
           icon="menu"
-          aria-label="Menu"
-          @click="leftDrawerOpen = !leftDrawerOpen"
+          @click="toggleLeftDrawer"
+          class="q-mr-sm"
         />
-
-        <q-toolbar-title>
-         Wate Billing App
-        </q-toolbar-title>
-
-        <div>Logout</div>
+        <q-toolbar-title> Water Billing System </q-toolbar-title>
       </q-toolbar>
     </q-header>
 
-    <q-drawer
-      v-model="leftDrawerOpen"
-      show-if-above
-      bordered
-      content-class="bg-grey-1"
-    >
-    <q-list bordered padding class=" text-primary">
-      <q-item
-        clickable
-        v-ripple
-        :active="link === 'inbox'"
-        @click="link = 'inbox'"
-        active-class="my-menu-link"
-      >
-        <q-item-section avatar>
-          <q-icon name="inbox" />
-        </q-item-section>
+    <q-drawer v-model="leftDrawerOpen" show-if-above bordered>
+      <!-- <q-list>
+        <q-item to="/" clickable v-ripple>
+          <q-item-section avatar>
+            <q-icon name="home" />
+          </q-item-section>
+          <q-item-section>
+            <q-item-label>Home</q-item-label>
+          </q-item-section>
+        </q-item>
+        <q-item to="/consumer" clickable v-ripple>
+          <q-item-section avatar>
+            <q-icon name="people" />
+          </q-item-section>
+          <q-item-section>
+            <q-item-label>Accounts</q-item-label>
+          </q-item-section>
+        </q-item>
+        <q-item to="/billings" clickable v-ripple>
+          <q-item-section avatar>
+            <q-icon name="people" />
+          </q-item-section>
+          <q-item-section>
+            <q-item-label>Billing</q-item-label>
+          </q-item-section>
+        </q-item>
+        <q-item to="/collections" clickable v-ripple>
+          <q-item-section avatar>
+            <q-icon name="people" />
+          </q-item-section>
+          <q-item-section>
+            <q-item-label>Collections</q-item-label>
+          </q-item-section>
+        </q-item>
+        <q-item to="/reports" clickable v-ripple>
+          <q-item-section avatar>
+            <q-icon name="people" />
+          </q-item-section>
+          <q-item-section>
+            <q-item-label>Reports</q-item-label>
+          </q-item-section>
+        </q-item>
+        <q-item to="/bills" clickable v-ripple>
+          <q-item-section avatar>
+            <q-icon name="receipt" />
+          </q-item-section>
+          <q-item-section>
+            <q-item-label>Bills</q-item-label>
+          </q-item-section>
+        </q-item>
+        <q-item to="/billing-rates" clickable v-ripple>
+          <q-item-section avatar>
+            <q-icon name="attach_money" />
+          </q-item-section>
+          <q-item-section>
+            <q-item-label>Billing Rates</q-item-label>
+          </q-item-section>
+        </q-item>
+      </q-list> -->
 
-        <q-item-section>Inbox</q-item-section>
-      </q-item>
+      <q-list bordered class="rounded-borders">
+        <q-expansion-item
+          expand-separator
+          icon="people"
+          label="Accounts"
+          default-opened
+        >
+          <q-item to="/membership" clickable v-ripple>
+            <q-item-section avatar> </q-item-section>
+            <q-item-section>
+              <q-item-label>Membership</q-item-label>
+            </q-item-section>
+          </q-item>
 
-      <q-item
-        clickable
-        v-ripple
-        :active="link === 'outbox'"
-        @click="link = 'outbox'"
-        active-class="my-menu-link"
-      >
-        <q-item-section avatar>
-          <q-icon name="send" />
-        </q-item-section>
+          <q-item to="/consumers" clickable v-ripple>
+            <q-item-section avatar> </q-item-section>
+            <q-item-section>
+              <q-item-label>Consumers</q-item-label>
+            </q-item-section>
+          </q-item>
+        </q-expansion-item>
 
-        <q-item-section>Outbox</q-item-section>
-      </q-item>
-
-      <q-item
-        clickable
-        v-ripple
-        :active="link === 'trash'"
-        @click="link = 'trash'"
-        active-class="my-menu-link"
-      >
-        <q-item-section avatar>
-          <q-icon name="delete" />
-        </q-item-section>
-
-        <q-item-section>Trash</q-item-section>
-      </q-item>
-
-      <q-separator spaced />
-
-      <q-item
-        clickable
-        v-ripple
-        :active="link === 'settings'"
-        @click="link = 'settings'"
-        active-class="my-menu-link"
-      >
-        <q-item-section avatar>
-          <q-icon name="settings" />
-        </q-item-section>
-
-        <q-item-section>Settings</q-item-section>
-      </q-item>
-
-      <q-item
-        clickable
-        v-ripple
-        :active="link === 'help'"
-        @click="link = 'help'"
-        active-class="my-menu-link"
-      >
-        <q-item-section avatar>
-          <q-icon name="help" />
-        </q-item-section>
-
-        <q-item-section>Help</q-item-section>
-      </q-item>
-    </q-list>
+        <q-item to="/billings" clickable v-ripple>
+          <q-item-section avatar>  <q-icon name="payments" /> </q-item-section>
+          <q-item-section>
+            <q-item-label>Billings</q-item-label>
+          </q-item-section>
+        </q-item>
+        <q-item to="/collections" clickable v-ripple>
+          <q-item-section avatar> <q-icon name="receipt_long" /></q-item-section>
+          <q-item-section>
+            <q-item-label>Collections</q-item-label>
+          </q-item-section>
+        </q-item>
+        <q-item to="/reports" clickable v-ripple>
+          <q-item-section avatar> <q-icon name="article" /></q-item-section>
+          <q-item-section>
+            <q-item-label>Reports</q-item-label>
+          </q-item-section>
+        </q-item>
+      </q-list>
     </q-drawer>
 
     <q-page-container>
@@ -107,67 +124,23 @@
 </template>
 
 <script>
-
-const linksData = [
-  {
-    title: 'Docs',
-    caption: 'quasar.dev',
-    icon: 'school',
-    link: 'https://quasar.dev'
-  },
-  {
-    title: 'Github',
-    caption: 'github.com/quasarframework',
-    icon: 'code',
-    link: 'https://github.com/quasarframework'
-  },
-  {
-    title: 'Discord Chat Channel',
-    caption: 'chat.quasar.dev',
-    icon: 'chat',
-    link: 'https://chat.quasar.dev'
-  },
-  {
-    title: 'Forum',
-    caption: 'forum.quasar.dev',
-    icon: 'record_voice_over',
-    link: 'https://forum.quasar.dev'
-  },
-  {
-    title: 'Twitter',
-    caption: '@quasarframework',
-    icon: 'rss_feed',
-    link: 'https://twitter.quasar.dev'
-  },
-  {
-    title: 'Facebook',
-    caption: '@QuasarFramework',
-    icon: 'public',
-    link: 'https://facebook.quasar.dev'
-  },
-  {
-    title: 'Quasar Awesome',
-    caption: 'Community Quasar projects',
-    icon: 'favorite',
-    link: 'https://awesome.quasar.dev'
-  }
-]
-
 export default {
-  name: 'MainLayout',
-  data () {
+  data() {
     return {
-      leftDrawerOpen: false,
-      essentialLinks: linksData,
-      link: 'inbox'
-    }
-  }
-}
+      leftDrawerOpen: true,
+    };
+  },
+  methods: {
+    toggleLeftDrawer() {
+      this.leftDrawerOpen = !this.leftDrawerOpen;
+    },
+  },
+};
 </script>
 
 <style scoped>
-.my-menu-link {
-  color: white;
-  background: #F2C037;
+.q-toolbar-title {
+  flex: 1 1 auto;
+  text-align: left;
 }
 </style>

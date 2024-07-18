@@ -1,29 +1,22 @@
-import Vue from 'vue'
-import Vuex from 'vuex'
+import Vue from "vue";
+import Vuex from "vuex";
 
-// import example from './module-example'
+Vue.use(Vuex);
 
-Vue.use(Vuex)
+const modules = {};
 
-/*
- * If not building with SSR mode, you can
- * directly export the Store instantiation;
- *
- * The function below can be async too; either use
- * async/await or return a Promise which resolves
- * with the Store instance.
- */
+const requireModule = require.context("./modules", false, /\.js$/);
+requireModule.keys().forEach((fileName) => {
+  const moduleName = fileName.replace(/(\.\/|\.js)/g, "");
+  const moduleConfig = requireModule(fileName);
+  modules[moduleName] = moduleConfig.default || moduleConfig;
+});
 
-export default function (/* { ssrContext } */) {
+export default function () {
   const Store = new Vuex.Store({
-    modules: {
-      // example
-    },
+    modules,
+    strict: process.env.DEBUGGING,
+  });
 
-    // enable strict mode (adds overhead!)
-    // for dev mode only
-    strict: process.env.DEBUGGING
-  })
-
-  return Store
+  return Store;
 }
