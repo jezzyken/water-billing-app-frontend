@@ -108,6 +108,12 @@
             <q-item-label>Collections</q-item-label>
           </q-item-section>
         </q-item>
+        <q-item to="/expenses" clickable v-ripple>
+          <q-item-section avatar>  <q-icon name="account_balance_wallet" /> </q-item-section>
+          <q-item-section>
+            <q-item-label>Expenses</q-item-label>
+          </q-item-section>
+        </q-item>
         <q-item to="/reports" clickable v-ripple>
           <q-item-section avatar> <q-icon name="article" /></q-item-section>
           <q-item-section>

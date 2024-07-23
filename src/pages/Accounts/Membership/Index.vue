@@ -142,7 +142,12 @@
           <div class="text-h4">Success! New Consumer has been registered</div>
         </div>
         <q-stepper-navigation>
-          <q-btn color="primary" @click="done3 = true" label="Finish" />
+          <q-btn
+            color="primary"
+            @click="done3 = true"
+            label="Finish"
+            :to="{ path: '/consumers' }"
+          />
         </q-stepper-navigation>
       </q-step>
     </q-stepper>
@@ -150,7 +155,6 @@
 </template>
 
 <script>
-import axios from "axios";
 import { mapActions } from "vuex";
 
 export default {
@@ -278,8 +282,8 @@ export default {
         payment: { ...this.payment, totalBill: this.membershipFee },
       };
 
-      const response = await this.addItem(data)
-      console.log(response)
+      await this.addItem(data);
+      this.step = 3;
     },
   },
   mounted() {

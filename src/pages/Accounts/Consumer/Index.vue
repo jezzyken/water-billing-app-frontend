@@ -2,7 +2,7 @@
   <q-page>
     <q-card>
       <q-card-section>
-        <div class="text-h6">Customers</div>
+        <div class="text-h6">Consumers</div>
       </q-card-section>
       <q-card-section>
         <q-btn
@@ -10,11 +10,25 @@
           @click="
             $router.push({ name: 'Customer Form', params: { action: 'add' } })
           "
-          >Add Customer</q-btn
+          >Add Consumer</q-btn
         >
       </q-card-section>
       <q-card-section>
-        <q-table :data="consumer" :columns="columns" row-key="name"> </q-table>
+        <q-table :data="consumer" :columns="columns" row-key="name">
+          <template v-slot:body-cell-actions="props">
+            <q-td align="right">
+              <q-btn
+                color="primary"
+                @click="onViewItem(props.row)"
+                icon="visibility"
+                size="9px"
+                padding="xs"
+                class="q-mr-xs"
+              />
+              <q-btn color="negative" icon="delete" dense size="10px" />
+            </q-td>
+          </template>
+        </q-table>
       </q-card-section>
     </q-card>
   </q-page>
@@ -82,6 +96,12 @@ export default {
     async fetch() {
       const response = await this.getItems();
       this.consumer = response.result;
+    },
+    onViewItem(item) {
+      this.$router.push({
+        path: `/consumer/${item._id}/view`,
+      });
+
     },
   },
   created() {
