@@ -286,9 +286,6 @@ export default {
       this.step = 3;
     },
   },
-  mounted() {
-    this.fetchBills();
-  },
 };
 </script>
 
