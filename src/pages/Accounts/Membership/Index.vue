@@ -230,7 +230,7 @@ export default {
       payment: {
         amountPaid: 0,
         change: 0,
-        paymentDescription: "Membership Fee",
+        collectionType: "Membership Fee",
       },
       membershipFee: 200,
     };

@@ -82,7 +82,7 @@
                 <q-input
                   filled
                   label="Consumption "
-                   v-model.number="consumption"
+                  v-model.number="consumption"
                 />
               </div>
               <div class="col-6">
@@ -121,6 +121,8 @@
 
 <script>
 import { mapActions } from "vuex";
+import moment from "moment";
+
 export default {
   props: {
     value: Boolean,
@@ -150,7 +152,7 @@ export default {
         meterDescription: "Water",
         billingDate: null,
         previousRead: 0,
-        presentRead: 0
+        presentRead: 0,
       },
       showBillingForm: false,
       billing: {},
@@ -167,16 +169,17 @@ export default {
   },
 
   computed: {
-    consumption: {
+    consumption: { 
       get() {
-        const consumptionValue = this.items.presentRead - this.items.previousRead;
+        const consumptionValue =
+          this.items.presentRead - this.items.previousRead;
         return consumptionValue >= 0 ? consumptionValue : 0;
       },
       set(value) {
         const validValue = value >= 0 ? value : 0;
         this.items.previousRead = this.items.presentRead - validValue;
-      }
-    }
+      },
+    },
   },
   methods: {
     ...mapActions({
@@ -185,39 +188,47 @@ export default {
     }),
 
     async onAddItem() {
-      const currentDate = new Date();
-      const presentYear = currentDate.getFullYear();
-      const presentMonthIndex = currentDate.getMonth();
-
-      const previousMonthIndex = this.months.indexOf(this.items.month);
-      const presentMonthIndexForDate = presentMonthIndex;
-
-      const previousDate = new Date(this.items.year, previousMonthIndex, 1);
-      const presentDate = new Date(presentYear, presentMonthIndexForDate, 1);
+      const presentDate = moment(
+        `${this.items.month} ${this.items.year}`,
+        "MMMM YYYY"
+      ).toDate();
+      const previousDate = this.getPreviousMonthAndYear(
+        this.items.month,
+        this.items.year
+      );
 
       const data = {
         ...this.items,
         consumerId: this.$route.params.id,
-        previousDate: previousDate,
-        presentDate: presentDate,
+        previousDate,
+        presentDate,
         billingDate: new Date(this.items.billingDate),
       };
 
       await this.addItem(data);
-      this.dialog = false
-      this.$emit("getItems")
+      this.dialog = false;
+      this.$emit("getItems");
     },
 
     async getItem() {
       this.isLoading = true;
       const response = await this.getConsumerItemById(this.$route.params.id);
-      if(response.status === 404){
-        this.isLoading = false
+      if (response.status === 404) {
+        this.isLoading = false;
       }
 
       this.billing = response.result;
       this.items.previousRead = this.billing.presentRead;
       this.isLoading = false;
+    },
+
+    getPreviousMonthAndYear(month, year) {
+      const date = moment(`${month} ${year}`, "MMMM YYYY");
+
+      date.subtract(1, "month");
+      const previousDate = date.toDate();
+
+      return previousDate;
     },
   },
   watch: {

@@ -91,7 +91,7 @@ export default {
           name: "consumerId",
           label: "Consumer  ",
           align: "left",
-          field: "consumerId",
+          field: "name",
         },
         {
           name: "billingDate",
@@ -135,7 +135,11 @@ export default {
     }),
     async fetch() {
       const response = await this.getConsumerItemsById(this.$route.params.id);
-      this.consumer = response.result;
+      this.consumer = response.result.map(item => ({
+        ...item,
+        name: `${item.consumerId.firstName} ${item.consumerId.middleName} ${item.consumerId.lastName}`
+      }));
+
     },
     onViewItem(item) {
       this.$router.push({

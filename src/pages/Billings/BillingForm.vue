@@ -36,10 +36,13 @@
       </q-card-section>
     </q-card>
 
-    <div class="row ">
+    <div class="row">
       <div class="col-9">
         <q-card :flat="true" v-if="currentBilling">
           <div class="q-pa-md">
+            <div class="text-body1 q-mb-sm q-mt-md text-weight-bold">
+              Billing Statement
+            </div>
             <q-table
               :data="[readingData]"
               :columns="readingColumns"
@@ -58,19 +61,19 @@
               <q-item>
                 <q-item-section>PRESENT BILL:</q-item-section>
                 <q-item-section side>{{
-                  currentBilling.presentBill
+                  statement.presentBill
                 }}</q-item-section>
               </q-item>
               <q-item>
                 <q-item-section>PREVIOUS BALANCE:</q-item-section>
                 <q-item-section side>{{
-                  currentBilling.previousBalance
+                  statement.previousBalance
                 }}</q-item-section>
               </q-item>
               <q-item>
                 <q-item-section>OTHER CHARGES:</q-item-section>
                 <q-item-section side>{{
-                  currentBilling.otherCharges
+                  statement.otherCharges
                 }}</q-item-section>
               </q-item>
               <q-item>
@@ -80,7 +83,7 @@
                   >
                 </q-item-section>
                 <q-item-section side class="text-weight-bold">{{
-                  totalAmountPayable
+                  statement.totalBill
                 }}</q-item-section>
               </q-item>
             </q-list>
@@ -125,6 +128,7 @@
 
 <script>
 import { mapActions } from "vuex";
+import moment from "moment";
 
 export default {
   data() {
@@ -197,12 +201,12 @@ export default {
         },
       ],
       columns: [
-        {
-          name: "consumerId",
-          label: "Consumer ID",
-          align: "left",
-          field: "consumerId",
-        },
+        // {
+        //   name: "consumerId",
+        //   label: "Consumer ID",
+        //   align: "left",
+        //   field: "consumerId",
+        // },
         {
           name: "billingDate",
           label: "Billing Date",
@@ -233,31 +237,39 @@ export default {
           align: "left",
           field: "status",
         },
-        { name: "actions", label: "Actions", align: "right" },
+        // { name: "actions", label: "Actions", align: "right" },
       ],
+      statement: {},
     };
   },
   computed: {
     consumerData() {
       if (!this.currentBilling) return {};
       return {
-        consumerName: this.currentBilling.consumerId,
-        billingDate: this.currentBilling.billingDate,
-        dueDate: this.currentBilling.dueDate,
+        consumerName: this.currentBilling.name,
+        billingDate: moment(this.currentBilling.billingDate).format(
+          "YYYY-MM-DD"
+        ),
+        dueDate: moment(this.currentBilling.dueDate).format("YYYY-MM-DD"),
       };
     },
     readingData() {
       if (!this.currentBilling) return {};
       return {
-        previousDate: this.currentBilling.previousDate,
+        previousDate: moment(this.currentBilling.previousDate).format(
+          "YYYY-MM-DD"
+        ),
         previousRead: this.currentBilling.previousRead,
-        presentDate: this.currentBilling.presentDate,
+        presentDate: moment(this.currentBilling.presentDate).format(
+          "YYYY-MM-DD"
+        ),
         presentRead: this.currentBilling.presentRead,
         consumption: this.currentBilling.consumption,
         readType: this.currentBilling.readType,
         meterDescription: this.currentBilling.meterDescription,
       };
     },
+
     totalAmountPayable() {
       if (!this.currentBilling) return 0;
       return (
@@ -276,26 +288,84 @@ export default {
   methods: {
     ...mapActions({
       getConsumerItemsById: "billings/getConsumerItemsById",
+      addCollectionItem: "collections/addItem",
     }),
     async fetch() {
       const response = await this.getConsumerItemsById(this.$route.params.id);
-      this.consumers = response.result;
+      this.consumers = response.result.map((item) => ({
+        ...item,
+        billingDate: moment(item.billingDate).format("YYYY-MM-DD"),
+      }));
+
+      this.statement = this.generateBillingStatement(response.result);
+
       if (this.consumers.length > 0) {
         this.currentBilling = this.consumers[0];
+        this.currentBilling.name = `${this.currentBilling.consumerId.firstName} ${this.currentBilling.consumerId.middleName} ${this.currentBilling.consumerId.lastName}`;
       }
-      console.log(this.currentBilling);
     },
+
     onViewItem(item) {
       this.$router.push({
         path: `/consumer/${item._id}/view`,
       });
     },
+    generateBillingStatement(records) {
+      records.sort((a, b) => new Date(b.billingDate) - new Date(a.billingDate));
 
-    processPayment() {
-      console.log("Processing payment...");
-      console.log("Cash amount:", this.cashAmount);
-      console.log("Total amount payable:", this.totalAmountPayable);
-      console.log("Change:", this.changeAmount);
+      const recentRecord = records[0];
+
+      let totalBill = 0;
+      let previousBalance = 0;
+      let hasUnpaidRecords = false;
+
+      records.forEach((record) => {
+        if (record.status === "Unpaid") {
+          hasUnpaidRecords = true;
+          totalBill += record.presentBill;
+
+          if (record._id.toString() !== recentRecord._id.toString()) {
+            previousBalance += record.presentBill;
+            console.log(previousBalance);
+          }
+        }
+      });
+
+      const presentBill = hasUnpaidRecords ? recentRecord.presentBill : 0;
+
+      const billingStatement = {
+        previousDate: recentRecord.previousDate,
+        previousRead: recentRecord.previousRead,
+        presentDate: recentRecord.presentDate,
+        presentRead: recentRecord.presentRead,
+        consumption: recentRecord.consumption,
+        readType: recentRecord.readType,
+        meterDescription: recentRecord.meterDescription,
+        presentBill: presentBill,
+        totalBill: totalBill,
+        previousBalance: previousBalance,
+      };
+
+      return billingStatement;
+    },
+
+    async processPayment() {
+      const unpaidBillId = this.consumers
+        .filter((item) => item.status != "Paid")
+        .map((item) => item._id);
+
+        const data = {
+          billId: unpaidBillId,
+          consumerId: this.$route.params.id,
+          totalBill: this.totalAmountPayable,
+          amountPaid: this.cashAmount,
+          change: this.changeAmount,
+          paymentMethod: 'Cash',
+          collectionType: 'Water Bill'
+        }
+
+        const response = await this.addCollectionItem(data)
+
     },
   },
   created() {

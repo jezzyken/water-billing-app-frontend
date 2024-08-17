@@ -5,7 +5,7 @@
         <div class="text-h6">Collections</div>
       </q-card-section>
       <q-card-section>
-        <q-table :data="consumer" :columns="columns" row-key="name">
+        <q-table :data="consumer" :columns="columns" row-key="_id">
           <template v-slot:body-cell-actions="props">
             <q-td align="right">
               <q-btn
@@ -28,6 +28,7 @@
 <script>
 import axios from "axios";
 import { mapActions } from "vuex";
+import moment from "moment"
 
 export default {
   data() {
@@ -41,10 +42,10 @@ export default {
           field: "paymentDate",
         },
         {
-          name: "consumerId",
+          name: "name",
           label: "Consumer",
           align: "left",
-          field: "consumerId",
+          field: "name",
         },
         {
           name: "totalBill",
@@ -54,15 +55,15 @@ export default {
         },
         {
           name: "paymentMethod",
-          label: "payment Method",
+          label: "Payment Method",
           align: "left",
           field: "paymentMethod",
         },
         {
-          name: "paymentDescription",
-          label: "Payment Description",
+          name: "collectionType",
+          label: "Collection Type",
           align: "left",
-          field: "paymentDescription",
+          field: "collectionType",
         },
         { name: "actions", label: "Actions", align: "right" },
       ],
@@ -74,7 +75,11 @@ export default {
     }),
     async fetch() {
       const response = await this.getItems();
-      this.consumer = response.result;
+      this.consumer = response.result.map((item) => ({
+        ...item,
+        name: `${item.consumerId.firstName} ${item.consumerId.middleName} ${item.consumerId.lastName}`,
+        paymentDate: moment(item.paymentDate).format('YYYY-MM-DD hh:mm a')
+      }));
     },
     onViewItem(item) {
       console.log(item);
