@@ -158,7 +158,6 @@ export default {
     };
   },
   created() {
-    console.log("created");
     const currentYear = new Date().getFullYear();
     const startYear = 2000;
 

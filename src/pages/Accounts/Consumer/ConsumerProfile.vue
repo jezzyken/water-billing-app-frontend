@@ -126,7 +126,7 @@ export default {
         { name: "actions", label: "Actions", align: "right" },
       ],
       tab: "mails",
-      showDialog: true,
+      showDialog: false,
     };
   },
   methods: {
