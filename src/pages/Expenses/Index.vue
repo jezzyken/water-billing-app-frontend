@@ -5,57 +5,130 @@
         <div class="text-h6">Expenses</div>
       </q-card-section>
       <q-card-section>
-        <q-btn color="primary" @click="addBill">Add Bill</q-btn>
-      </q-card-section>
-      <q-card-section>
-        <q-table :rows="bills" :columns="columns" row-key="id">
+        <q-table
+          :data="expenses"
+          :columns="columns"
+          row-key="_id"
+          :filter="filter"
+        >
+          <template v-slot:top>
+
+            <q-input
+              dense
+              debounce="300"
+              v-model="filter"
+              placeholder="Search"
+              outlined
+            >
+              <template v-slot:append>
+                <q-icon name="search" />
+              </template>
+            </q-input>
+            <q-space />
+            <q-btn color="primary" label="Add Bill" @click="onShowDialog" />
+           
+          </template>
+
           <template v-slot:body-cell-actions="props">
-            <q-td :props="props">
-              <q-btn flat icon="edit" @click="editBill(props.row)"></q-btn>
-              <q-btn flat icon="delete" @click="deleteBill(props.row)"></q-btn>
+            <q-td align="right">
+              <q-btn
+                color="primary"
+                @click="onViewItem(props.row)"
+                icon="visibility"
+                size="9px"
+                padding="xs"
+                class="q-mr-xs"
+              />
+              <q-btn
+                color="negative"
+                icon="delete"
+                dense
+                size="10px"
+                @click="onDeleteItem(props.row)"
+              />
             </q-td>
           </template>
         </q-table>
       </q-card-section>
     </q-card>
+
+    <expense-dialog v-model="showDialog" @getItems="fetch" />
   </q-page>
 </template>
 
 <script>
-import axios from 'axios';
+import axios from "axios";
+import ExpenseDialog from "../../components/ExpenseDialog.vue";
+import { mapActions } from "vuex";
 
 export default {
+  components: {
+    ExpenseDialog,
+  },
   data() {
     return {
-      bills: [],
       columns: [
-        { name: 'billingDate', required: true, label: 'Billing Date', align: 'left', field: row => row.billingDate },
-        { name: 'dueDate', required: true, label: 'Due Date', align: 'left', field: row => row.dueDate },
-        { name: 'presentRead', required: true, label: 'Present Read', align: 'left', field: row => row.presentRead },
-        { name: 'cubicConsumption', required: true, label: 'Cubic Consumption', align: 'left', field: row => row.cubicConsumption },
-        { name: 'presentBill', required: true, label: 'Present Bill', align: 'left', field: row => row.presentBill },
-        { name: 'status', required: true, label: 'Status', align: 'left', field: row => row.status },
-        { name: 'actions', required: true, label: 'Actions', align: 'right' }
-      ]
+        {
+          name: "date",
+          required: true,
+          label: "Date",
+          align: "left",
+          field: "date",
+        },
+        {
+          name: "expenseType",
+          required: true,
+          label: "Type of Expense",
+          align: "left",
+          field: "expenseType",
+        },
+        {
+          name: "amount",
+          required: true,
+          label: "Due Date",
+          align: "left",
+          field: "amount",
+        },
+        {
+          name: "description",
+          required: true,
+          label: "Description",
+          align: "left",
+          field: "description",
+        },
+        { name: "actions", required: true, label: "Actions", align: "right" },
+      ],
+      showDialog: false,
+      expenses: [],
+      filter: "",
     };
   },
-  methods: {
-    async fetchBills() {
-      const response = await axios.get('/api/bills');
-      this.bills = response.data;
-    },
-    addBill() {
-      // Logic to add a bill
-    },
-    editBill(bill) {
-      // Logic to edit a bill
-    },
-    deleteBill(bill) {
-      // Logic to delete a bill
-    }
+
+  created() {
+    this.fetch();
   },
-  mounted() {
-    this.fetchBills();
-  }
-}
+
+  methods: {
+    ...mapActions({
+      getItems: "expenses/getItem",
+    }),
+
+    async fetch() {
+      const response = await this.getItems();
+      this.expenses = response.result;
+    },
+
+    onViewItem(item) {
+      console.log("update");
+    },
+
+    onDeleteItem(item) {
+      console.log("delete");
+    },
+
+    onShowDialog() {
+      this.showDialog = true;
+    },
+  },
+};
 </script>
