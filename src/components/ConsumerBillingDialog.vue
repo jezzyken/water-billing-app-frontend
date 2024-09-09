@@ -169,7 +169,7 @@ export default {
   },
 
   computed: {
-    consumption: { 
+    consumption: {
       get() {
         const consumptionValue =
           this.items.presentRead - this.items.previousRead;

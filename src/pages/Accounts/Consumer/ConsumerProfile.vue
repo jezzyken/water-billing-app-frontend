@@ -87,12 +87,12 @@ export default {
     return {
       consumer: [],
       columns: [
-        {
-          name: "consumerId",
-          label: "Consumer  ",
-          align: "left",
-          field: "name",
-        },
+        // {
+        //   name: "name",
+        //   label: "Consumer  ",
+        //   align: "left",
+        //   field: "name",
+        // },
         {
           name: "billingDate",
           label: "Billing Date",
@@ -140,6 +140,7 @@ export default {
         name: `${item.consumerId.firstName} ${item.consumerId.middleName} ${item.consumerId.lastName}`
       }));
 
+      console.log(response.result)
     },
     onViewItem(item) {
       this.$router.push({
