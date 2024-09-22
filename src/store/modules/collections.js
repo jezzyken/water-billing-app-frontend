@@ -29,6 +29,15 @@ const actions = {
     }
   },
 
+  async getItemByConsumerId({ commit }, id) {
+    try {
+      const response = await axios.get(`${url}/${endpoint}/consumer/${id}`);
+      return response;
+    } catch (error) {
+      return error.response;
+    }
+  },
+
   async getStockItems({ commit }, id) {
     try {
       const response = await axios.get(`${url}/${endpoint}/${id}/product`);

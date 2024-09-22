@@ -2,7 +2,7 @@
   <q-page>
     <q-card>
       <q-card-section>
-        <div class="text-h6">Consumers</div>
+        <div class="text-h6">{{ $route.name }}</div>
       </q-card-section>
       <q-card-section>
         <q-table
@@ -10,38 +10,7 @@
           :columns="columns"
           row-key="name"
           :filter="filter"
-          :rows-per-page-options="[15, 20, 25, 50, 0 ]"
         >
-          <template v-slot:body="props">
-            <q-tr
-              :props="props"
-              :class="props.rowIndex % 2 === 0 ? 'bg-green-1' : ''"
-            >
-              <q-td>
-                <q-btn
-                  color="primary"
-                  @click="onSelectItem(props.row)"
-                  size="9px"
-                  label="select"
-                />
-              </q-td>
-              <q-td v-for="col in props.cols" :key="col.name" :props="props">
-                {{ col.value }}
-              </q-td>
-              <q-td auto-width>
-                <q-btn
-                  color="primary"
-                  @click="onViewItem(props.row)"
-                  icon="visibility"
-                  size="9px"
-                  padding="xs"
-                  class="q-mr-xs"
-                />
-                <q-btn color="negative" icon="delete" dense size="10px" />
-              </q-td>
-            </q-tr>
-          </template>
-
           <template v-slot:top>
             <q-input
               dense
@@ -55,7 +24,15 @@
               </template>
             </q-input>
             <q-space />
-            <q-btn color="primary" label="Add" @click="onShowDialog" />
+            <!-- <q-btn
+              color="primary"
+              @click="
+                $router.push({
+                  name: 'Customer Form',
+                  params: { action: 'add' },
+                })
+              "
+              >Add Consumer</q-btn -->
           </template>
 
           <template v-slot:body-cell-actions="props">
@@ -68,21 +45,12 @@
                 padding="xs"
                 class="q-mr-xs"
               />
-              <q-btn
-                color="secondary"
-                @click="onSelectItem(props.row)"
-                icon="check"
-                size="9px"
-                padding="xs"
-                class="q-mr-xs"
-              />
               <q-btn color="negative" icon="delete" dense size="10px" />
             </q-td>
           </template>
         </q-table>
       </q-card-section>
     </q-card>
-    <consumer-dialog ref="consumer" v-model="showDialog" @getItems="fetch" :consumerData="item" :update="update"/>
   </q-page>
 </template>
 
@@ -90,25 +58,11 @@
 import axios from "axios";
 import { mapActions } from "vuex";
 
-// Components
-import ConsumerDialog from "../../../components/ConsumerDialog.vue";
-
 export default {
-  components: {
-    ConsumerDialog,
-  },
   data() {
     return {
       consumer: [],
       columns: [
-        {
-          name: "",
-          label: "Select",
-          align: "left",
-          field: "select",
-          required: true,
-          style: "width: 50px",
-        },
         {
           name: "accountNo",
           label: "Account No",
@@ -151,12 +105,9 @@ export default {
           align: "left",
           field: "contactNo",
         },
-        { name: "", label: "Actions", align: "right" },
+        { name: "actions", label: "Actions", align: "right" },
       ],
       filter: "",
-      showDialog: false,
-      item: {},
-      update: false
     };
   },
   methods: {
@@ -168,18 +119,9 @@ export default {
       this.consumer = response.result;
     },
     onViewItem(item) {
-      this.item = item
-      this.showDialog = true;
-      this.update = true
-    },
-    onSelectItem(item) {
       this.$router.push({
         path: `/consumer/${item._id}/view`,
       });
-    },
-    onShowDialog() {
-      this.update = false
-      this.showDialog = true;
     },
   },
   created() {

@@ -11,6 +11,7 @@
           hide-bottom
           flat
           bordered
+          class="readingColumn"
         />
         <div class="text-body1 q-mb-sm q-mt-md text-weight-bold">
           Billing Records
@@ -21,6 +22,14 @@
           row-key="name"
           hide-bottom
         >
+          <template v-slot:body-cell-status="props">
+            <q-td>
+              <q-badge :color="props.row.status === 'Paid' ? 'green' : 'red'">
+                {{ props.row.status }}
+              </q-badge>
+            </q-td>
+          </template>
+
           <template v-slot:body-cell-actions="props">
             <q-td :props="props">
               <q-btn
@@ -49,7 +58,7 @@
               hide-bottom
               flat
               bordered
-              class="q-mt-md"
+              class="q-mt-md readingColumn"
             />
 
             <q-list bordered class="q-mt-md">
@@ -129,6 +138,7 @@
 <script>
 import { mapActions } from "vuex";
 import moment from "moment";
+import Swal from "sweetalert2";
 
 export default {
   data() {
@@ -240,6 +250,7 @@ export default {
         // { name: "actions", label: "Actions", align: "right" },
       ],
       statement: {},
+      isLoading: false,
     };
   },
   computed: {
@@ -350,22 +361,60 @@ export default {
     },
 
     async processPayment() {
-      const unpaidBillId = this.consumers
-        .filter((item) => item.status != "Paid")
-        .map((item) => item._id);
+      const result = await Swal.fire({
+        title: "Confirm Payment",
+        text: "Are you sure you want to proceed with this payment?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Yes, proceed",
+        cancelButtonText: "No, cancel",
+      });
 
-        const data = {
-          billId: unpaidBillId,
-          consumerId: this.$route.params.id,
-          totalBill: this.totalAmountPayable,
-          amountPaid: this.cashAmount,
-          change: this.changeAmount,
-          paymentMethod: 'Cash',
-          collectionType: 'Water Bill'
+      if (result.isConfirmed) {
+        try {
+          this.isLoading = true;
+          const unpaidBillId = this.consumers
+            .filter((item) => item.status !== "Paid")
+            .map((item) => item._id);
+
+          const data = {
+            billId: unpaidBillId,
+            consumerId: this.$route.params.id,
+            totalBill: this.totalAmountPayable,
+            amountPaid: this.cashAmount,
+            change: this.changeAmount,
+            paymentMethod: "Cash",
+            collectionType: "Water Bill",
+            paymentDate: new Date(),
+          };
+
+          await this.addCollectionItem(data);
+
+          Swal.fire({
+            icon: "success",
+            title: "Payment Successful",
+            text: "The payment was processed successfully!",
+          });
+
+          this.onCompletePayment();
+        } catch (error) {
+          console.log(error);
+        } finally {
+          this.isLoading = false;
         }
+      } else {
+        Swal.fire({
+          icon: "info",
+          title: "Payment Cancelled",
+          text: "The payment process has been cancelled.",
+        });
+      }
+    },
 
-        const response = await this.addCollectionItem(data)
-
+    onCompletePayment() {
+      this.$router.push({ name: "billings" });
     },
   },
   created() {
@@ -373,3 +422,13 @@ export default {
   },
 };
 </script>
+
+
+<style>
+.readingColumn .q-table__top,
+.readingColumn .q-table__bottom,
+.readingColumn thead tr:first-child th {
+  background-color: #1976d2;
+  color: #fff
+}
+</style>

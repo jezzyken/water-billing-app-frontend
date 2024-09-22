@@ -97,29 +97,54 @@
         </q-expansion-item>
 
         <q-item to="/billings" clickable v-ripple>
-          <q-item-section avatar>  <q-icon name="payments" /> </q-item-section>
+          <q-item-section avatar> <q-icon name="payments" /> </q-item-section>
           <q-item-section>
             <q-item-label>Billings</q-item-label>
           </q-item-section>
         </q-item>
         <q-item to="/collections" clickable v-ripple>
-          <q-item-section avatar> <q-icon name="receipt_long" /></q-item-section>
+          <q-item-section avatar>
+            <q-icon name="receipt_long"
+          /></q-item-section>
           <q-item-section>
             <q-item-label>Collections</q-item-label>
           </q-item-section>
         </q-item>
         <q-item to="/expenses" clickable v-ripple>
-          <q-item-section avatar>  <q-icon name="account_balance_wallet" /> </q-item-section>
+          <q-item-section avatar>
+            <q-icon name="account_balance_wallet" />
+          </q-item-section>
           <q-item-section>
             <q-item-label>Expenses</q-item-label>
           </q-item-section>
         </q-item>
-        <q-item to="/reports" clickable v-ripple>
-          <q-item-section avatar> <q-icon name="article" /></q-item-section>
-          <q-item-section>
-            <q-item-label>Reports</q-item-label>
-          </q-item-section>
-        </q-item>
+        <q-expansion-item
+          expand-separator
+          icon="article"
+          label="Reports"
+          default-opened
+        >
+          <q-item to="/reports/collections" clickable v-ripple>
+            <q-item-section avatar> </q-item-section>
+            <q-item-section>
+              <q-item-label>Collections</q-item-label>
+            </q-item-section>
+          </q-item>
+
+          <q-item to="/reports/consumers" clickable v-ripple>
+            <q-item-section avatar> </q-item-section>
+            <q-item-section>
+              <q-item-label>Consumers</q-item-label>
+            </q-item-section>
+          </q-item>
+
+          <q-item to="/reports/expenses" clickable v-ripple>
+            <q-item-section avatar> </q-item-section>
+            <q-item-section>
+              <q-item-label>Expenses</q-item-label>
+            </q-item-section>
+          </q-item>
+        </q-expansion-item>
       </q-list>
     </q-drawer>
 

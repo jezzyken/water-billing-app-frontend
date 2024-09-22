@@ -17,6 +17,7 @@
                 :options="months"
                 label="Present Date"
                 required
+                :disable="update"
               />
             </div>
             <div class="col-3">
@@ -26,6 +27,7 @@
                 :options="years"
                 label="Year"
                 required
+                :disable="update"
               />
             </div>
           </div>
@@ -41,6 +43,7 @@
                   mask="date"
                   :rules="['date']"
                   label="Billing Date"
+                  :disable="update"
                 >
                   <template v-slot:append>
                     <q-icon name="event" class="cursor-pointer">
@@ -69,6 +72,7 @@
                   v-model="items.previousRead"
                   filled
                   label="Previous Read"
+                  :disable="true"
                 />
               </div>
               <div class="col-3">
@@ -83,6 +87,7 @@
                   filled
                   label="Consumption "
                   v-model.number="consumption"
+                   :disable="true"
                 />
               </div>
               <div class="col-6">
@@ -113,7 +118,7 @@
 
       <q-card-actions align="right">
         <q-btn flat label="close" color="primary" v-close-popup />
-        <q-btn @click="onAddItem" flat label="save" color="primary" />
+        <q-btn @click="onAddItem" flat :label="buttonLabel" color="primary" />
       </q-card-actions>
     </q-card>
   </q-dialog>
@@ -126,6 +131,8 @@ import moment from "moment";
 export default {
   props: {
     value: Boolean,
+    billingData: Object,
+    update: Boolean,
   },
   data() {
     return {
@@ -159,6 +166,7 @@ export default {
       isLoading: false,
     };
   },
+
   created() {
     const currentYear = new Date().getFullYear();
     const startYear = 2000;
@@ -179,6 +187,9 @@ export default {
         const validValue = value >= 0 ? value : 0;
         this.items.previousRead = this.items.presentRead - validValue;
       },
+    },
+    buttonLabel() {
+      return this.update ? "Update" : "Save";
     },
   },
   methods: {
@@ -205,7 +216,12 @@ export default {
         billingDate: new Date(this.items.billingDate),
       };
 
-      await this.addItem(data);
+      if (this.update) {
+        console.log("update");
+      } else {
+        await this.addItem(data);
+      }
+
       this.dialog = false;
       this.$emit("getItems");
     },
@@ -230,6 +246,16 @@ export default {
 
       return previousDate;
     },
+
+    clearForm() {
+      this.items = {
+        readType: "Actual",
+        meterDescription: "Water",
+        billingDate: null,
+        previousRead: 0,
+        presentRead: 0,
+      };
+    },
   },
   watch: {
     value(val) {
@@ -237,6 +263,22 @@ export default {
     },
     dialog(val) {
       this.$emit("input", val);
+      if (!val) {
+        this.clearForm();
+      }
+    },
+    billingData: {
+      handler(newVal) {
+        this.items = {
+          ...this.items,
+          billingDate: newVal.billingDate,
+          previousRead: newVal.previousRead,
+          presentRead: newVal.presentRead,
+          month: moment(newVal.presentDate).format("MMMM"),
+          year: moment(newVal.presentDate).format("YYYY"),
+        };
+      },
+      immediate: true,
     },
   },
 };

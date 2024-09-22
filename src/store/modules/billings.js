@@ -47,6 +47,15 @@ const actions = {
     }
   },
 
+  async getRecentBilling({ commit }, id) {
+    try {
+      const response = await axios.get(`${url}/${endpoint}/${id}/consumer/items`);
+      return response.data;
+    } catch (error) {
+      return error.response;
+    }
+  },
+
   async getStockItems({ commit }, id) {
     try {
       const response = await axios.get(`${url}/${endpoint}/${id}/product`);
@@ -83,6 +92,16 @@ const actions = {
       return error.response;
     }
   },
+
+  async getTemplates({  }) {
+    try {
+      const response = await axios.get(`${url}/${endpoint}/templates`);
+      return response;
+    } catch (error) {
+      return error.response;
+    }
+  },
+
 };
 
 const mutations = {

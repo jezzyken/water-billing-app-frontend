@@ -5,12 +5,11 @@
     </div>
     <q-banner dense class="bg-primary text-white">
       <div>
-        <div class="text-h6">Jezzy Kruger</div>
+        <div class="text-h6">{{ consumerInfo.fullName }}</div>
         <div class="text-body-1">
-          Lorem ipsum dolor, sit amet consectetur adipisicing elit. Voluptatem,
-          fugit?
+          {{ consumerInfo.fullAddress }}
         </div>
-        <div class="text-body-1">+1234567890</div>
+        <div class="text-body-1">{{ consumerInfo.contactNo }}</div>
       </div>
     </q-banner>
 
@@ -36,17 +35,44 @@
             <div class="fit row">
               <div>
                 <div class="text-h6">Billing</div>
-                Lorem ipsum dolor sit amet consectetur adipisicing elit.
-              </div>
-              <div class="q-ml-auto">
-                <q-btn color="primary" @click="onShowDialog"
-                  >Create Billing</q-btn
-                >
+                List off consumer billing records
               </div>
             </div>
 
             <div class="q-mt-md">
-              <q-table :data="consumer" :columns="columns" row-key="name">
+              <q-table
+                :data="consumers"
+                :columns="columns"
+                row-key="_id"
+                :filter="filter"
+              >
+                <template v-slot:body-cell-status="props">
+                  <q-td>
+                    <q-badge
+                      :color="props.row.status === 'Paid' ? 'green' : 'red'"
+                    >
+                      {{ props.row.status }}
+                    </q-badge>
+                  </q-td>
+                </template>
+
+                <template v-slot:top>
+                  <q-input
+                    dense
+                    debounce="300"
+                    v-model="filter"
+                    placeholder="Search"
+                    outlined
+                  >
+                    <template v-slot:append>
+                      <q-icon name="search" />
+                    </template>
+                  </q-input>
+                  <q-space />
+                  <q-btn color="primary" @click="onShowDialog"
+                    >Create Billing</q-btn
+                  >
+                </template>
                 <template v-slot:body-cell-actions="props">
                   <q-td align="right">
                     <q-btn
@@ -65,19 +91,66 @@
           </q-tab-panel>
 
           <q-tab-panel name="alarms">
-            <div class="text-h6">Payment History</div>
-            Lorem ipsum dolor sit amet consectetur adipisicing elit.
+            <div class="fit row">
+              <div>
+                <div class="text-h6">Payment History</div>
+                List off consumer payment records
+              </div>
+            </div>
+            <div class="q-mt-md">
+              <q-table
+                :data="collections"
+                :columns="collectionColumns"
+                row-key="_id"
+                :filter="collectionFilter"
+              >
+                <template v-slot:top>
+                  <q-input
+                    dense
+                    debounce="300"
+                    v-model="collectionFilter"
+                    placeholder="Search"
+                    outlined
+                  >
+                    <template v-slot:append>
+                      <q-icon name="search" />
+                    </template>
+                  </q-input>
+                  <q-space />
+                </template>
+                <!-- <template v-slot:body-cell-actions="props">
+              <q-td align="right">
+                <q-btn
+                  color="primary"
+                  @click="onViewItem(props.row)"
+                  icon="visibility"
+                  size="9px"
+                  padding="xs"
+                  class="q-mr-xs"
+                />
+                <q-btn color="negative" icon="delete" dense size="10px" />
+              </q-td>
+            </template> -->
+              </q-table>
+            </div>
           </q-tab-panel>
         </q-tab-panels>
       </q-card>
-      <ConsumerBillingDialog ref="billing" v-model="showDialog" @getItems="fetch"/>
+      <ConsumerBillingDialog
+        ref="billing"
+        v-model="showDialog"
+        @getItems="fetch"
+        :billingData="item"
+        :update="update"
+      />
     </div>
   </div>
 </template>
 
 <script>
-import { mapActions } from "vuex";
+import { mapActions, mapGetters } from "vuex";
 import ConsumerBillingDialog from "../../../components/ConsumerBillingDialog.vue";
+import moment from "moment";
 
 export default {
   components: {
@@ -85,7 +158,8 @@ export default {
   },
   data() {
     return {
-      consumer: [],
+      consumers: [],
+      collections: [],
       columns: [
         // {
         //   name: "name",
@@ -125,32 +199,96 @@ export default {
         },
         { name: "actions", label: "Actions", align: "right" },
       ],
+
+      collectionColumns: [
+        {
+          name: "paymentDate",
+          label: "Payment Date",
+          align: "left",
+          field: "paymentDate",
+        },
+        {
+          name: "totalBill",
+          label: "Total Bill",
+          align: "left",
+          field: "totalBill",
+        },
+        {
+          name: "amountPaid",
+          label: "Amount Paid",
+          align: "left",
+          field: "amountPaid",
+        },
+        {
+          name: "paymentMethod",
+          label: "Payment Method",
+          align: "left",
+          field: "paymentMethod",
+        },
+        {
+          name: "collectionType",
+          label: "Collection Type",
+          align: "left",
+          field: "collectionType",
+        },
+        // { name: "actions", label: "Actions", align: "right" },
+      ],
+      collectionFilter: "",
+
       tab: "mails",
       showDialog: false,
+      filter: "",
+      item: {},
+      update: false
     };
+  },
+  computed: {
+    ...mapGetters("consumers", ["consumer"]),
+    consumerInfo() {
+      const fullName =
+        `${this.consumer.firstName} ${this.consumer.middleName} ${this.consumer.lastName}`.toUpperCase();
+      const fullAddress = `${this.consumer.purok} ${this.consumer.address}`;
+      return {
+        ...this.consumer,
+        fullName,
+        fullAddress,
+      };
+    },
   },
   methods: {
     ...mapActions({
       getConsumerItemsById: "billings/getConsumerItemsById",
+      getConsumer: "consumers/getItemById",
+      getCollections: "collections/getItemByConsumerId",
     }),
     async fetch() {
-      const response = await this.getConsumerItemsById(this.$route.params.id);
-      this.consumer = response.result.map(item => ({
+      const consumerId = this.$route.params.id;
+      const response = await this.getConsumerItemsById(consumerId);
+      const collectionData = await this.getCollections(consumerId);
+      await this.getConsumer(consumerId);
+      this.consumers = response.result.map((item) => ({
         ...item,
-        name: `${item.consumerId.firstName} ${item.consumerId.middleName} ${item.consumerId.lastName}`
+        name: `${item.consumerId.firstName} ${item.consumerId.middleName} ${item.consumerId.lastName}`,
+        billingDate: moment(item.billingDate).format("YYYY-MM-DD"),
       }));
 
-      console.log(response.result)
+      this.collections = collectionData.data.result.map((item) => ({
+        ...item,
+        paymentDate: moment(item.paymentDate).format("YYYY-MM-DD hh:mm A"),
+      }));
+
+      console.log(this.collections);
     },
     onViewItem(item) {
-      this.$router.push({
-        path: `/consumer/${item._id}/view`,
-      });
+      this.item = item
+      this.showDialog = true;
+      this.update = true
     },
-    onShowDialog(){
+    onShowDialog() {
       this.$refs.billing.getItem();
-      this.showDialog = true
-    }
+      this.showDialog = true;
+      this.update = false
+    },
   },
   created() {
     this.fetch();
@@ -164,6 +302,7 @@ export default {
   margin: 0 auto;
   padding: 20px;
 }
+
 .submit-button {
   margin-top: 20px;
   align-self: flex-start;

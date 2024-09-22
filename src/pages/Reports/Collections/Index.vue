@@ -2,7 +2,7 @@
   <q-page>
     <q-card>
       <q-card-section>
-        <div class="text-h6">Collections</div>
+        <div class="text-h6">{{ $route.name }}</div>
       </q-card-section>
       <q-card-section>
         <q-table
@@ -10,28 +10,7 @@
           :columns="columns"
           row-key="_id"
           :filter="filter"
-          :rows-per-page-options="[15, 20, 25, 50, 0 ]"
         >
-
-        <template v-slot:body="props">
-          <q-tr :props="props" :class="props.rowIndex % 2 === 0 ? 'bg-green-1' : ''">
-            <q-td v-for="col in props.cols" :key="col.name" :props="props">
-              {{ col.value }}
-            </q-td>
-            <q-td auto-width>
-              <q-btn
-                color="primary"
-                @click="onViewItem(props.row)"
-                icon="visibility"
-                size="9px"
-                padding="xs"
-                class="q-mr-xs"
-              />
-              <q-btn color="negative" icon="delete" dense size="10px" />
-            </q-td>
-          </q-tr>
-        </template>
-        
           <template v-slot:top>
             <q-input
               dense
@@ -120,8 +99,6 @@ export default {
         name: `${item.consumerId.firstName} ${item.consumerId.middleName} ${item.consumerId.lastName}`,
         paymentDate: moment(item.paymentDate).format("YYYY-MM-DD hh:mm a"),
       }));
-
-      console.log(this.consumer)
     },
     onViewItem(item) {
       console.log(item);

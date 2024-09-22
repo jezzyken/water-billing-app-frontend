@@ -6,9 +6,14 @@ const url = require("../../../config").url;
 
 const state = {
   items: [],
+  item: {}
 };
 
 const endpoint = "consumers";
+
+const getters = {
+  consumer: (state) => state.item,
+};
 
 const actions = {
   async getItem({ commit }, data) {
@@ -23,6 +28,7 @@ const actions = {
   async getItemById({ commit }, id) {
     try {
       const response = await axios.get(`${url}/${endpoint}/${id}`);
+      commit("SET_ITEM", response.data.result)
       return response.data;
     } catch (error) {
       return error.response;
@@ -69,13 +75,16 @@ const actions = {
 
 const mutations = {
   SET_ITEM(state, data) {
-    state.items = data;
+    state.item = data;
   },
 };
+
+
 
 export default {
   namespaced: true,
   state,
+  getters,
   actions,
   mutations,
 };

@@ -2,10 +2,7 @@
   <q-page>
     <q-card>
       <q-card-section>
-        <div class="text-h6">Reports</div>
-      </q-card-section>
-      <q-card-section>
-        <q-btn color="primary" @click="addBill">Add Bill</q-btn>
+        <div class="text-h6">{{ $route.name }}</div>
       </q-card-section>
       <q-card-section>
         <q-table :rows="bills" :columns="columns" row-key="id">
